@@ -1,142 +1,125 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>AI Ebook Studio X</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Inter:wght@400;600&display=swap');
-
-body{
-  margin:0;
-  font-family:'Inter',sans-serif;
-  background:radial-gradient(circle at 20% 30%,#1a1a2e,#0f0f1a 60%);
-  color:white;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  min-height:100vh;
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg,#0f0c29,#302b63,#24243e);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
-.container{
-  width:95%;
-  max-width:900px;
-  background:rgba(255,255,255,0.05);
-  backdrop-filter:blur(20px);
-  border-radius:20px;
-  padding:40px;
-  box-shadow:0 0 40px rgba(140,0,255,0.3);
+.container {
+  width: 95%;
+  max-width: 700px;
+  background: rgba(255,255,255,0.05);
+  padding: 30px;
+  border-radius: 20px;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 0 40px rgba(0,255,255,0.2);
+  text-align: center;
+  color: white;
 }
 
-h1{
-  font-family:'Orbitron',sans-serif;
-  font-size:36px;
-  text-align:center;
-  margin-bottom:20px;
-  background:linear-gradient(90deg,#00f2ff,#a100ff);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
+h1 {
+  font-size: 36px;
+  margin-bottom: 25px;
+  background: linear-gradient(to right,#00f5ff,#a200ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-textarea{
-  width:100%;
-  height:120px;
-  padding:15px;
-  border-radius:12px;
-  border:none;
-  font-size:16px;
-  background:#111;
-  color:white;
-  outline:none;
-  box-shadow:inset 0 0 10px rgba(0,255,255,0.2);
+textarea {
+  width: 100%;
+  height: 120px;
+  border-radius: 12px;
+  border: none;
+  padding: 15px;
+  font-size: 16px;
+  resize: none;
+  margin-bottom: 20px;
 }
 
-button{
-  margin-top:15px;
-  padding:14px 35px;
-  border-radius:12px;
-  border:none;
-  font-weight:600;
-  cursor:pointer;
-  background:linear-gradient(90deg,#00f2ff,#a100ff);
-  color:white;
-  transition:0.3s;
-  box-shadow:0 0 20px rgba(161,0,255,0.5);
+button {
+  width: 100%;
+  padding: 15px;
+  border-radius: 12px;
+  border: none;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-bottom: 15px;
+  background: linear-gradient(to right,#00f5ff,#a200ff);
+  color: white;
 }
 
-button:hover{
-  transform:scale(1.05);
-  box-shadow:0 0 30px rgba(0,255,255,0.7);
+button:hover {
+  opacity: 0.9;
 }
 
-#status{
-  margin-top:15px;
-  font-size:14px;
-  color:#00f2ff;
-}
-
-#result{
-  margin-top:20px;
-  background:#111;
-  padding:20px;
-  border-radius:15px;
-  max-height:400px;
-  overflow:auto;
-  white-space:pre-wrap;
-  box-shadow:inset 0 0 20px rgba(0,255,255,0.2);
+#result {
+  margin-top: 20px;
+  background: rgba(0,0,0,0.4);
+  padding: 15px;
+  border-radius: 12px;
+  max-height: 250px;
+  overflow-y: auto;
+  text-align: left;
+  white-space: pre-wrap;
 }
 </style>
 </head>
 
 <body>
-
 <div class="container">
-<h1>AI Ebook Studio X</h1>
+  <h1>AI Ebook Studio X</h1>
 
-<textarea id="topic" placeholder="Masukkan ide ebook premium kamu..."></textarea>
+  <textarea id="prompt" placeholder="Masukkan ide ebook premium kamu..."></textarea>
 
-<button onclick="generateEbook()">Generate Premium Ebook</button>
-<button onclick="downloadPDF()">Download PDF</button>
+  <button onclick="generateEbook()">Generate Premium Ebook</button>
 
-<div id="status"></div>
-<div id="result"></div>
+  <div id="result"></div>
 </div>
 
 <script>
-let fullBook="";
+async function generateEbook() {
+  const prompt = document.getElementById("prompt").value;
+  const resultDiv = document.getElementById("result");
 
-async function generateEbook(){
-  const topic=document.getElementById("topic").value;
-  const status=document.getElementById("status");
-  const result=document.getElementById("result");
+  if (!prompt) {
+    resultDiv.innerText = "Masukkan ide terlebih dahulu.";
+    return;
+  }
 
-  status.innerHTML="⚡ Generating premium ebook...";
-  result.innerHTML="";
+  resultDiv.innerText = "Generating ebook...";
 
-  const res=await fetch("/api/generate",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({topic})
-  });
+  try {
+    const response = await fetch("/api/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt })
+    });
 
-  const data=await res.json();
+    const data = await response.json();
 
-  fullBook=data.book;
-  result.innerText=fullBook;
-  status.innerHTML="✅ Ebook generated successfully";
-}
+    if (data.ebook) {
+      resultDiv.innerText = data.ebook;
+    } else {
+      resultDiv.innerText = "Gagal generate ebook.";
+    }
 
-async function downloadPDF(){
-  const { jsPDF }=window.jspdf;
-  const doc=new jsPDF();
-  doc.setFontSize(12);
-  doc.text(fullBook,10,10,{maxWidth:190});
-  doc.save("ebook-studio-x.pdf");
+  } catch (error) {
+    resultDiv.innerText = "Terjadi kesalahan.";
+  }
 }
 </script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 </body>
 </html>
