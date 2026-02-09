@@ -3,39 +3,38 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  try {
-    const { prompt } = req.body;
+  const { prompt } = req.body;
 
+  try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
           contents: [
             {
               parts: [
                 {
-                  text: `Buatkan ebook lengkap minimal 10 bab dengan penjelasan detail dan profesional tentang: ${prompt}`
+                  text: `Buatkan ebook profesional lengkap minimal 10 bab dengan judul menarik, daftar isi, pembuka, isi tiap bab detail, dan penutup tentang: ${prompt}`
                 }
               ]
             }
           ]
-        }),
+        })
       }
     );
 
     const data = await response.json();
 
     const text =
-      data.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "Gagal menghasilkan ebook.";
+      data.candidates?.[0]?.content?.parts?.[0]?.text || "Gagal menghasilkan ebook.";
 
     res.status(200).json({ text });
 
   } catch (error) {
-    res.status(500).json({ error: "Terjadi kesalahan." });
+    res.status(500).json({ error: "Server error" });
   }
 }
